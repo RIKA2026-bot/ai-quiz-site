@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שאלונים, חידונים וקוויזים באמצעות בינה מלאכותית</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* משתני צבע ועיצוב - Dark Theme */
+        :root {
+            --bg-color: #0f111a;
+            --surface-color: #1a1d2d;
+            --surface-light: #25293d;
+            --primary-color: #7289da;
+            --primary-hover: #5b6eae;
+            --secondary-color: #00f2c3;
+            --text-main: #ffffff;
+            --text-muted: #a0a6c0;
+            --border-color: #32364c;
+            --border-radius: 20px;
+            --transition: all 0.3s ease;
+        }
+
+        html {
+            scroll-behavior: smooth; /* גלילה חלקה בלחיצה על התפריט */
+            scroll-padding-top: 100px; /* מרווח מלמעלה כדי שהתפריט לא יסתיר את הכותרות */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Assistant', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+        h1, h2, h3, h4 { line-height: 1.2; margin-bottom: 1rem; }
+        p { margin-bottom: 1rem; color: var(--text-muted); font-size: 1.1rem; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* תפריט ניווט עליון */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(15, 17, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .nav-logo-container {
+            display: flex;
+            align-items: center;
+        }
+        .nav-logo-container img {
+            height: 50px; /* גובה הלוגו בתפריט */
+            width: auto;
+            border-radius: 8px; /* למקרה שהלוגו מרובע */
+        }
+        .nav-links {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-link {
+            background-color: white; /* תיבת טקסט לבנה */
+            color: var(--bg-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .nav-link:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+        .nav-btn-smart {
+            background-color: var(--secondary-color);
+            color: var(--bg-color);
+            padding: 8px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: 0 0 10px rgba(0, 242, 195, 0.3);
+            margin-right: 15px; /* מרווח קל מהכלים */
+        }
+        .nav-btn-smart:hover {
+            background-color: #00d1a9;
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(0, 242, 195, 0.5);
+        }
+
+        /* מסך פתיחה */
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: radial-gradient(circle at 50% -20%, var(--surface-light) 0%, var(--bg-color) 70%);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 50px;
+        }
+        .hero h1 { font-size: 3.2rem; font-weight: 800; color: var(--secondary-color); margin-bottom: 1rem; }
+        .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto; }
+
+        /* יחידות הכלים */
+        .tool-section {
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            margin-bottom: 50px;
+            border: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: var(--transition);
+        }
+        .tool-section:hover { border-color: var(--primary-color); }
+
+        .tool-content { display: flex; flex-direction: column; }
+        .tool-content h2 { font-size: 2.2rem; color: var(--secondary-color); }
+        .tool-explanation { font-size: 1.2rem; font-weight: 600; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; color: white; }
+
+        .features-grid { display: grid; gap: 15px; margin-bottom: 25px; }
+        .feature-box { background-color: var(--surface-light); padding: 15px 20px; border-radius: 12px; }
+        .feature-box h3 { font-size: 1.1rem; color: var(--primary-color); margin-bottom: 5px; }
+        .feature-box ul { list-style: none; }
+        .feature-box ul li { position: relative; padding-right: 15px; color: var(--text-muted); font-size: 1rem; }
+        .feature-box ul li::before { content: "•"; position: absolute; right: 0; color: var(--secondary-color); }
+
+        /* וידאו */
+        .video-wrapper { width: 100%; display: flex; flex-direction: column; justify-content: center; }
+        .video-container {
+            position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
+            border-radius: 16px; background-color: #000; border: 1px solid var(--border-color);
+        }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; border: none; }
+
+        /* כפתורים */
+        .actions { display: flex; gap: 10px; margin-top: auto; flex-wrap: wrap; }
+        .btn {
+            padding: 12px 20px; font-size: 1.05rem; font-weight: 700; border-radius: 10px; cursor: pointer;
+            text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+            transition: var(--transition); border: none; flex: 1; min-width: 140px; text-align: center;
+        }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+        .btn-outline { background-color: transparent; color: var(--secondary-color); border: 2px solid var(--secondary-color); }
+        .btn-outline:hover { background-color: rgba(0, 242, 195, 0.1); transform: translateY(-2px); }
+        
+        /* עיצוב כפתור PDF */
+        .btn-pdf { background-color: transparent; color: var(--text-muted); border: 2px solid var(--border-color); }
+        .btn-pdf:hover { background-color: var(--surface-light); color: white; border-color: var(--text-muted); transform: translateY(-2px); }
+
+        /* סיום האתר */
+        .conclusion { background: linear-gradient(to top, var(--surface-color), var(--bg-color)); padding: 60px 20px 40px; text-align: center; border-top: 1px solid var(--border-color); }
+        .conclusion h2 { font-size: 2.2rem; margin-bottom: 30px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; margin-bottom: 60px; }
+        .summary-card { background-color: var(--surface-light); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); }
+        .summary-card h3 { color: var(--secondary-color); margin-bottom: 10px; font-size: 1.2rem; }
+        .summary-card p { font-size: 1rem; }
+
+        /* אזור הקרדיט והלוגו בתחתית */
+        .footer-credits {
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .footer-credits p {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        .circle-logo {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            padding: 10px; /* ריווח פנימי כדי שהלוגו לא יגע בקצוות */
+        }
+        .circle-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* מודל (חלון קופץ) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(15, 17, 26, 0.95); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; opacity: 0; visibility: hidden; transition: var(--transition);
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        
+        .modal-content {
+            background-color: var(--surface-color); width: 95%; max-width: 1000px; height: 90vh;
+            border-radius: var(--border-radius); border: 1px solid var(--primary-color);
+            display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+        
+        .modal-header { padding: 15px 25px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { margin: 0; color: var(--secondary-color); font-size: 1.4rem; }
+        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 2rem; cursor: pointer; }
+        .close-btn:hover { color: white; }
+
+        .modal-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 20px; }
+        .modal-body.embed-mode { padding: 0; }
+        
+        .slide-content { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        @media (max-width: 992px) {
+            .tool-section { grid-template-columns: 1fr; }
+            .video-wrapper { order: -1; }
+            .top-nav { justify-content: center; }
+        }
+        @media (max-width: 600px) {
+            .actions { flex-direction: column; }
+            .btn { width: 100%; }
+            .nav-links { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- תפריט ניווט עליון חדש -->
+    <nav class="top-nav">
+        <div class="nav-logo-container">
+            <!-- יש להעלות קובץ בשם logo.png לתיקייה באותו מיקום כמו ה-index.html -->
+            <img src="logo.png" alt="לוגו האתר" onerror="this.style.display='none'">
+        </div>
+        <div class="nav-links">
+            <a href="#quizlet" class="nav-link">Quizlet</a>
+            <a href="#magicschool" class="nav-link">MagicSchool AI</a>
+            <a href="#questionwell" class="nav-link">QuestionWell</a>
+            <a href="#edpuzzle" class="nav-link">Edpuzzle</a>
+            <a href="#edcafe" class="nav-link">Edcafe.ai</a>
+            <a href="#choosing-tool" class="nav-btn-smart">לבחירת כלי חכמה 🎯</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <h1>שאלונים, חידונים וקוויזים ב-AI</h1>
+            <p>שימוש בכלי בינה מלאכותית מאפשר ליצור במהירות פעילויות למידה איכותיות מתוך כל תוכן. הגבירו את מעורבות הלומדים, חזקו את חווית הלמידה, וחסכו זמן עבודה יקר.</p>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section id="quizlet" class="tool-section">
+            <div class="tool-content">
+                <h2>Quizlet</h2>
+                <p class="tool-explanation">יצירת כרטיסיות ושאלות מתוך טקסט לצורך תרגול ולמידה עצמית.</p>
+                <div class="features-grid">
+                    <div class="feature-box"><h3>🎯 שימושים</h3><ul><li>יצירת כרטיסיות מושגים והכנה למבחן</li></ul></div>
+                    <div class="feature-box"><h3>⭐ יתרונות</h3><ul><li>קל לשימוש, מהיר ועובד בעברית</li></ul></div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="handlePresentation('quizlet', 'Quizlet')">מצגת הסברה 🚀</button>
+                    <!-- כפתור להורדת קובץ PDF (וודאי שקובץ quizlet.pdf נמצא בתיקייה) -->
+                    <a href="quizlet.pdf" download="מדריך_Quizlet.pdf" class="btn btn-pdf">הורדת PDF 📄</a>
+                    <a href="https://quizlet.com" target="_blank" rel="noopener noreferrer" class="btn btn-outline">מעבר לכלי</a>
+                </div>
+            </div>
+            <div class="video-wrapper">
+                <div class="video-container">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/ds38vdgDDaA?si=cb5WSN9Z6hOgcYf9" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </div>
+        </section>
+
+        <section id="magicschool" class="tool-section">
+            <div class="tool-content">
+                <h2>MagicSchool AI</h2>
+                <p class="tool-explanation">כלי ייעודי למורים שמייצר שאלות, קוויזים ודפי עבודה מתוך תוכן מוגדר בקלות וביעילות.</p>
+                <div class="features-grid">
+                    <div class="feature-box"><h3>🎯 שימושים</h3><ul><li>יוצר קוויזים, שאלות פתוחות, דפי עבודה</li></ul></div>
+                    <div class="feature-box"><h3>⭐ יתרונות</h3><ul><li>מותאם למורים, שליטה ברמות קושי</li></ul></div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="handlePresentation('magicschool', 'MagicSchool AI')">מצגת הסברה 🚀</button>
+                    <a href="magicschool.pdf" download="מדריך_MagicSchool.pdf" class="btn btn-pdf">הורדת PDF 📄</a>
+                    <a href="https://www.magicschool.ai" target="_blank" rel="noopener noreferrer" class="btn btn-outline">מעבר לכלי</a>
+                </div>
+            </div>
+            <div class="video-wrapper">
+                <div class="video-container">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/qTUnKrGelTs?si=-N8oI6nijnpa3KmB" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </div>
+        </section>
+
+        <section id="questionwell" class="tool-section">
+            <div class="tool-content">
+                <h2>QuestionWell</h2>
+                <p class="tool-explanation">כלי שמייצר שאלות אמריקאיות מתוך טקסט ומאפשר ייצוא ישיר ל־Google Forms.</p>
+                <div class="features-grid">
+                    <div class="feature-box"><h3>🎯 שימושים</h3><ul><li>בניית מבחן, יצירת שאלונים ובדיקת ידע</li></ul></div>
+                    <div class="feature-box"><h3>⭐ יתרונות</h3><ul><li>חוסך זמן, ממוקד הערכה, ייצוא מהיר</li></ul></div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="handlePresentation('questionwell', 'QuestionWell')">מצגת הסברה 🚀</button>
+                    <a href="questionwell.pdf" download="מדריך_QuestionWell.pdf" class="btn btn-pdf">הורדת PDF 📄</a>
+                    <a href="https://questionwell.org" target="_blank" rel="noopener noreferrer" class="btn btn-outline">מעבר לכלי</a>
+                </div>
+            </div>
+            <div class="video-wrapper">
+                <div class="video-container">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/jqe8yaa75t4?si=R6F0LwO75Y1uMgIj" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </div>
+        </section>
+
+        <section id="edpuzzle" class="tool-section">
+            <div class="tool-content">
+                <h2>Edpuzzle</h2>
+                <p class="tool-explanation">הוספת שאלות אינטראקטיביות בתוך סרטוני וידאו, הופך צפייה פסיבית ללמידה פעילה.</p>
+                <div class="features-grid">
+                    <div class="feature-box"><h3>🎯 שימושים</h3><ul><li>מבדקים מבוססי וידאו, מעקב הבנה בזמן אמת</li></ul></div>
+                    <div class="feature-box"><h3>⭐ יתרונות</h3><ul><li>אינטראקטיביות גבוהה, נתוני צפייה מפורטים</li></ul></div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="handlePresentation('edpuzzle', 'Edpuzzle')">מצגת הסברה 🚀</button>
+                    <a href="edpuzzle.pdf" download="מדריך_Edpuzzle.pdf" class="btn btn-pdf">הורדת PDF 📄</a>
+                    <a href="https://edpuzzle.com" target="_blank" rel="noopener noreferrer" class="btn btn-outline">מעבר לכלי</a>
+                </div>
+            </div>
+            <div class="video-wrapper">
+                <div class="video-container">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/-0rBkWEZl9M?si=fq_QtcNrMF4_uBvF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </div>
+        </section>
+
+        <section id="edcafe" class="tool-section">
+            <div class="tool-content">
+                <h2>Edcafe.ai</h2>
+                <p class="tool-explanation">יצירת יחידות מיקרו-למידה, שאלונים חכמים ומסלולי למידה מותאמים אישית בקליק.</p>
+                <div class="features-grid">
+                    <div class="feature-box"><h3>🎯 שימושים</h3><ul><li>בניית הערכה מעצבת ומיקרו-למידה מותאמת</li></ul></div>
+                    <div class="feature-box"><h3>⭐ יתרונות</h3><ul><li>הפקת תוכן איכותי במהירות, ממשק ידידותי</li></ul></div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="handlePresentation('edcafe', 'Edcafe.ai')">מצגת הסברה 🚀</button>
+                    <a href="edcafe.pdf" download="מדריך_Edcafe.pdf" class="btn btn-pdf">הורדת PDF 📄</a>
+                    <a href="https://www.edcafe.ai" target="_blank" rel="noopener noreferrer" class="btn btn-outline">מעבר לכלי</a>
+                </div>
+            </div>
+            <div class="video-wrapper">
+                <div class="video-container">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/xbvYoX-KyGA?si=S44xqsKL2CkIKtBb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer id="choosing-tool" class="conclusion">
+        <div class="container">
+            <h2>איך לבחור את הכלי המתאים? 💡</h2>
+            <div class="summary-grid">
+                <div class="summary-card"><h3>לתרגול עצמי</h3><p>Quizlet מצוין לשינון והכנה למבחנים.</p></div>
+                <div class="summary-card"><h3>למבחנים מהירים</h3><p>QuestionWell מעולה לייצוא לגוגל פורמס.</p></div>
+                <div class="summary-card"><h3>למורים ופדגוגיה</h3><p>MagicSchool ו-Edcafe לתוכן מעמיק ומותאם.</p></div>
+                <div class="summary-card"><h3>לוידאו</h3><p>Edpuzzle לשילוב שאלות בתוך סרטונים.</p></div>
+            </div>
+            
+            <!-- אזור הקרדיט והלוגו בתחתית -->
+            <div class="footer-credits">
+                <p>אתר זה נוצר ע"י ריקי נחום עבור מורים ואנשי למידה.</p>
+                <div class="circle-logo">
+                    <!-- הלוגו של האתר בתוך העיגול הלבן -->
+                    <img src="logo.png" alt="לוגו ריקי נחום" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="presentationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">שם הכלי</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="slide-content" id="slideContent">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const presentationsData = {
+            'quizlet': "https://www.canva.com/design/DAHFOwh82HM/Y69Uy831OroHVh4y2pJ4kg/view?embed",
+            'magicschool': "https://www.canva.com/design/DAHFRYLpFHI/6eRIP05jCN8N0UXJ4BYIig/view?embed",
+            'questionwell': "https://www.canva.com/design/DAHFO6n_Hn0/AchABeDnlKjvkk8F84SfgQ/view?embed",
+            'edpuzzle': "https://www.canva.com/design/DAHFOxXDdyk/d6tBWqWy2yeJx0y31bZKlg/view?embed",
+            'edcafe': "https://www.canva.com/design/DAHFPrYQlBA/dSupAuo2crSAXVJQKlnNHg/view?embed"
+        };
+
+        const modal = document.getElementById('presentationModal');
+        const slideContent = document.getElementById('slideContent');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+
+        function handlePresentation(toolId, toolName) {
+            const embedUrl = presentationsData[toolId];
+            
+            modalTitle.innerText = toolName + " - מצגת הדרכה";
+            slideContent.style.opacity = 0;
+            
+            setTimeout(() => {
+                modalBody.classList.add('embed-mode');
+                slideContent.innerHTML = `
+                    <iframe src="${embedUrl}" style="width: 100%; height: 100%; min-height: 70vh; border: none; border-radius: 0 0 18px 18px;" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>
+                `;
+                slideContent.style.opacity = 1;
+            }, 100);
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            setTimeout(() => { slideContent.innerHTML = ''; }, 300);
+        }
+
+        modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    </script>
+</body>
+</html>
